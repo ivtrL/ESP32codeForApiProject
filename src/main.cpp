@@ -1,12 +1,12 @@
+#include <ArduinoJson.h>
+#include <HTTPClient.h>
+#include <MFRC522.h>
+#include <RFIDAuth.h>
 #include <SPI.h>
 #include <WiFi.h>
-#include <RFIDAuth.h>
-#include <HTTPClient.h>
-#include <ArduinoJson.h>
-#include <MFRC522.h>
 
 constexpr uint8_t RST_PIN = 2;
-constexpr uint8_t SS_PIN = 5;     
+constexpr uint8_t SS_PIN = 5;
 
 constexpr uint8_t RED_LED_PIN = 21;
 constexpr uint8_t GREEN_LED_PIN = 4;
@@ -16,8 +16,8 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 
 AuthClient authClient(&client, &mfrc522);
 
-const char* ssid = "VIVOFIBRA-4BA8";
-const char* passwordWifi = "5E259B8056";
+const char *ssid = "VIVOFIBRA-4BA8";
+const char *passwordWifi = "5E259B8056";
 
 // Login Server
 char httpLoginServer[] = "https://apiesp32.onrender.com/api/device/login";
@@ -25,7 +25,8 @@ char httpLoginServer[] = "https://apiesp32.onrender.com/api/device/login";
 AuthLoginResquest authLoginRequest;
 
 // Refresh Token Server
-char httpRefreshTokenServer[] = "https://apiesp32.onrender.com/api/auth/refresh-token/device";
+char httpRefreshTokenServer[] =
+    "https://apiesp32.onrender.com/api/auth/refresh-token/device";
 
 // Check Card Server
 char httpCheckCardServer[] = "https://apiesp32.onrender.com/api/card/check";
@@ -68,12 +69,13 @@ void setup() {
   authLoginRequest.password = "teste123";
   authLoginRequest.deviceName = "TESTEAPI";
   authLoginRequest.deviceUid = "40e22efe2c491935e4a55c72fc153dad";
-  
+
   String teste = "teste";
   if (teste == "teste")
     Serial.println("Teste");
 
-  AuthResponse AuthResponse = authClient.loginJwtToken(authLoginRequest, httpLoginServer);
+  AuthResponse AuthResponse =
+      authClient.loginJwtToken(authLoginRequest, httpLoginServer);
   if (AuthResponse.error) {
     Serial.println("Error: " + AuthResponse.errorMessage);
     return;
@@ -90,16 +92,15 @@ void loop() {
   if (cardUid == "")
     return;
   Serial.println("Card UID: " + cardUid);
-  CheckCardResponse Response = authClient.checkCard(authJwtTokens.AccessToken, cardUid, httpCheckCardServer);
+  CheckCardResponse Response =
+      authClient.checkCard(authJwtTokens.AccessToken, cardUid,
+                           authLoginRequest.deviceUid, httpCheckCardServer);
 
   checkCardCallback(Response);
 }
 
 void checkCardCallback(CheckCardResponse checkCardResponse) {
   // Put here the code that you want to execute when the callback is called
-  // You can access the variables returned by the main function using the checkCardResponse parameter
-  // Also the callback parameter is optional, you can remove it if you don't want to use it and just
-  // receive the response from the main function
 
   if (checkCardResponse.error) {
     Serial.println("Error: " + checkCardResponse.message);
