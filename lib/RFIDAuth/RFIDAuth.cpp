@@ -1,4 +1,4 @@
-#include <RFIDAuth.h>
+#include "RFIDAuth.h"
 #include <ArduinoJson.h>
 
 AuthClient::AuthClient(HTTPClient* http, MFRC522* mfrc522) {
@@ -37,8 +37,6 @@ AuthResponse AuthClient::loginJwtToken(AuthLoginResquest authLoginRequest, char*
     if (httpCode == 200) {
       authResponse.accessToken = doc["accessToken"].as<String>();
       authResponse.refreshToken = doc["refreshToken"].as<String>();
-      Serial.println("Access token: " + authResponse.accessToken);
-      Serial.println("Refresh token: " + authResponse.refreshToken);
       http->end();
       return authResponse;
     }
@@ -89,8 +87,7 @@ AuthResponse AuthClient::refreshJwtToken(String refreshToken, char* httpRefreshT
     return authResponse;
 }
 
-template <typename Lambda>
-CheckCardResponse AuthClient::checkCard(String accessToken, String cardUid, char* httpCheckCardServer, Lambda callback) {
+CheckCardResponse AuthClient::checkCard(String accessToken, String cardUid, char* httpCheckCardServer) {
     char jsonOutput[768];
     CheckCardResponse cardUidResponse;
     cardUidResponse.error = false;
@@ -113,14 +110,10 @@ CheckCardResponse AuthClient::checkCard(String accessToken, String cardUid, char
         Serial.println(error.c_str());
         http->end();
         cardUidResponse.error = true;
+        cardUidResponse.message = error.c_str();
         return cardUidResponse;
     }
-    if (httpCode == 200) {
-        cardUidResponse.message = doc["message"].as<String>();
-        http->end();
-        callback();
-        return cardUidResponse;
-    }
+    cardUidResponse.message = doc["message"].as<String>();
     Serial.println(doc["message"].as<String>());
     http->end();
     return cardUidResponse;
@@ -135,9 +128,10 @@ String AuthClient::getCardId() {
         return cardId;
     }
     for (byte i = 0; i < mfrc522->uid.size; i++) {
-        cardId.concat(String(mfrc522->uid.uidByte[i] < 0x10 ? "0" : ""));
-        cardId.concat(String(mfrc522->uid.uidByte[i], HEX));
-    }
+      cardId.concat(String(mfrc522->uid.uidByte[i] < 0x10 ? " 0" : " "));
+      cardId.concat(String(mfrc522->uid.uidByte[i], HEX));
+    };
+    
     cardId.toUpperCase();
     return cardId;
 }

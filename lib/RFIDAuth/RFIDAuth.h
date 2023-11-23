@@ -1,5 +1,5 @@
 #ifndef RFIDAuth_h
-#define RFIDAuth.h
+#define RFIDAuth_h
 
 #include <HTTPClient.h>
 #include <MFRC522.h>
@@ -33,9 +33,7 @@ class AuthClient {
     MFRC522* mfrc522;
     AuthResponse loginJwtToken(AuthLoginResquest authLoginResquest, char* httpLoginServer);
     AuthResponse refreshJwtToken(String refreshToken, char* httpRefreshTokenServer);
-
-    template <typename Lambda>
-    CheckCardResponse checkCard(String accessToken, String cardId, char* httpCheckCardServer, Lambda callback);
+    CheckCardResponse checkCard(String accessToken, String cardId, char* httpCheckCardServer);
     String getCardId();
 };
 
